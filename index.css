@@ -1,3 +1,4 @@
+
 /* Global Styles */
 :root {
   --primary-green: #009B77;
@@ -13,7 +14,12 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Montserrat', sans-serif; background-color: var(--background-color); color: var(--text-color-dark); line-height: 1.6; }
 #root { display: flex; flex-direction: column; min-height: 100vh; }
-header { padding: 2rem 1rem; text-align: center; }
+header { padding: 1.5rem 1rem; text-align: center; }
+.header-logo {
+    width: 120px;
+    height: auto;
+    margin-bottom: 1rem;
+}
 header h1 { font-size: 2.5rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 0.25rem; }
 header h1 span { display: block; font-size: 1.5rem; font-weight: 600; color: var(--primary-green); }
 main { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 1rem 2rem 3rem; width: 100%; max-width: 800px; margin: 0 auto; gap: 2rem; }
