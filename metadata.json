@@ -1,10 +1,1 @@
-{
-  "name": "Generador de Títulos de Tesis - Escuela de Líderes Bolivia",
-  "description": "Genera el título de tu investigación con la ayuda de expertos de la Escuela de Líderes Bolivia.",
-  "functions": [
-    {
-      "path": "api/index.js",
-      "entrypoint": "default"
-    }
-  ]
-}
+
