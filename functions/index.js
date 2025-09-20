@@ -1,7 +1,5 @@
-// Usa la herramienta 'node-fetch' que le acabamos de añadir.
-const fetch = require('node-fetch');
-
-// Esta es la función del servidor.
+// ESTA ES LA VERSIÓN FINAL Y CORRECTA DEL SERVIDOR
+// NO USA NINGUNA HERRAMIENTA EXTERNA, SOLO LAS QUE YA TIENE VERCEL.
 module.exports = async (req, res) => {
   // Configuración para permitir que tu página web hable con este motor.
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -65,4 +63,4 @@ module.exports = async (req, res) => {
     console.error('Error inesperado en la función del servidor:', error);
     res.status(500).json({ error: 'Ocurrió un error inesperado en el servidor.' });
   }
-};
+};    
