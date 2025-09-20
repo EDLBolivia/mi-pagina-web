@@ -1,32 +1,36 @@
-import { GoogleGenAI } from "@google/genai";
+const { GoogleGenAI } = require("@google/genai");
 
-// Initialize the AI client with the API key from environment variables
-const API_KEY = process.env.API_KEY;
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+// Esta función es el "motor" que se ejecuta en el servidor.
+module.exports = async (req, res) => {
+  // Configuración para permitir que tu página web hable con este motor.
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-// Define the API endpoint function
-export async function generateTitleApi(req, res) {
-  // Set CORS headers to allow requests from any origin
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'POST');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
-
-  // Handle preflight requests for CORS
+  // Manejo de una solicitud de prueba que hace el navegador.
   if (req.method === 'OPTIONS') {
     res.status(204).send('');
     return;
   }
 
-  // Ensure the request is a POST request
+  // Verifica que los datos se están enviando correctamente.
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  // Obtiene la clave secreta de Vercel.
+  const API_KEY = process.env.API_KEY;
+  if (!API_KEY) {
+    return res.status(500).json({ error: 'La clave de API no está configurada en el servidor.' });
+  }
+
+  const ai = new GoogleGenAI({ apiKey: API_KEY });
+
   const { documentType, area, topic, focus, objective, company } = req.body;
 
-  // Basic validation
+  // Validación de que todos los campos llegaron.
   if (!documentType || !area || !topic || !focus || !objective) {
-    return res.status(400).json({ error: 'Missing required fields' });
+    return res.status(400).json({ error: 'Faltan campos requeridos en la solicitud.' });
   }
 
   const prompt = `
@@ -83,4 +87,4 @@ export async function generateTitleApi(req, res) {
     console.error("Error generating title in backend:", error);
     res.status(500).json({ error: "Failed to generate title from the AI model." });
   }
-}
+};
