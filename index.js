@@ -11,21 +11,35 @@ async function generateTitle(documentType, area, topic, focus, objective, compan
             body: JSON.stringify({ documentType, area, topic, focus, objective, company }),
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-            throw new Error(data.error || 'Ocurrió un error desconocido en el servidor.');
+            // The server responded with an error status (4xx, 5xx)
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                // We got a JSON error from our own backend logic
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Error del servidor: ${response.status}`);
+            } else {
+                // We got an HTML error page from Vercel (e.g., 404 Not Found, 504 Timeout)
+                console.error("Server returned a non-JSON error response. Status:", `${response.status} ${response.statusText}`);
+                throw new Error(`El servidor falló (código: ${response.status}). Esto puede deberse a que la función no se encuentra en la ruta correcta o superó el límite de tiempo.`);
+            }
         }
-        
-        const title = data.title;
+
+        // If we're here, response.ok is true.
+        const data = await response.json(); // This could still fail if body isn't JSON despite 200 OK
         if (resultContainer) {
-            resultContainer.textContent = title;
+            resultContainer.textContent = data.title;
         }
 
     } catch (error) {
         console.error("Error al generar el título:", error);
+        let displayMessage = error.message;
+        // Catch JSON parsing errors specifically for 200 OK responses with invalid bodies
+        if (error instanceof SyntaxError) {
+            displayMessage = "Error al procesar la respuesta del servidor. La respuesta no tiene el formato esperado.";
+        }
         if (resultContainer) {
-            resultContainer.textContent = error.message || "Se produjo un error al generar el título. Por favor, inténtalo de nuevo.";
+            resultContainer.textContent = displayMessage;
         }
     } finally {
         setLoading(false);
