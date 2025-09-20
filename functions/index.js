@@ -1,3 +1,4 @@
+
 const { GoogleGenAI } = require("@google/genai");
 
 module.exports = async (req, res) => {
@@ -17,12 +18,16 @@ module.exports = async (req, res) => {
     const API_KEY = process.env.API_KEY;
     if (!API_KEY) {
       console.error("CRITICAL ERROR: API_KEY no está configurada.");
-      return res.status(500).json({ error: 'Error de configuración del servidor.' });
+      return res.status(500).json({ error: 'Error de configuración del servidor: La clave de API no está disponible.' });
     }
 
     const ai = new GoogleGenAI({apiKey: API_KEY});
 
     const { documentType, area, topic, focus, objective, company } = req.body;
+
+    if (!documentType || !area || !topic || !focus || !objective) {
+      return res.status(400).json({ error: 'Faltan campos requeridos en la solicitud.' });
+    }
 
     const prompt = `
       **Your Role & Goal:** You are an expert thesis advisor for 'Escuela de Líderes - Bolivia'. Your goal is to generate a professional, impactful, and methodologically sound academic title. Analyze the user's input deeply.
@@ -44,18 +49,21 @@ module.exports = async (req, res) => {
         model: 'gemini-2.5-flash',
         contents: prompt
     });
+    
+    if (!response.candidates || response.candidates.length === 0) {
+      console.error('Respuesta de la API de Gemini bloqueada o sin candidatos:', JSON.stringify(response, null, 2));
+      let errorMessage = 'La IA no pudo generar una respuesta.';
+      if (response.promptFeedback && response.promptFeedback.blockReason) {
+          errorMessage += ` Motivo: La solicitud fue bloqueada por seguridad (${response.promptFeedback.blockReason}).`;
+      }
+      return res.status(500).json({ error: errorMessage });
+    }
 
     const title = response.text;
-    
-    if (title) {
-        res.status(200).json({ title: title.trim() });
-    } else {
-        console.error('La API de Gemini devolvió una respuesta vacía o bloqueada.');
-        return res.status(500).json({ error: 'La IA no pudo generar una respuesta. El prompt puede haber sido bloqueado.' });
-    }
+    res.status(200).json({ title: title.trim() });
 
   } catch (error) {
     console.error('Error inesperado en la función del servidor:', error);
-    res.status(500).json({ error: 'Ocurrió un error inesperado en el servidor.' });
+    res.status(500).json({ error: 'Ocurrió un error inesperado en el servidor. Revisa los logs de la función para más detalles.' });
   }
 };
