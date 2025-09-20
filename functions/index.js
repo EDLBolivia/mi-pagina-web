@@ -1,5 +1,4 @@
 // ESTA ES LA VERSIÓN FINAL Y CORRECTA DEL SERVIDOR.
-// NO USA NINGUNA HERRAMIENTA EXTERNA, SOLO LAS QUE YA TIENE VERCEL.
 module.exports = async (req, res) => {
   // Configuración para permitir que tu página web hable con este motor.
   res.setHeader('Access-Control-Allow-Origin', '*');
