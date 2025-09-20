@@ -1,7 +1,5 @@
 // ESTA ES LA VERSIÓN FINAL Y CORRECTA DEL SERVIDOR.
 // NO USA NINGUNA HERRAMIENTA EXTERNA, SOLO LAS QUE YA TIENE VERCEL.
-const https = require('https');
-
 module.exports = async (req, res) => {
   // Configuración para permitir que tu página web hable con este motor.
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -41,48 +39,29 @@ module.exports = async (req, res) => {
       **Generate the Final Title Now.**
     `;
 
-    const postData = JSON.stringify({
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+    
+    const requestBody = {
       contents: [{
         parts: [{ text: prompt }]
       }]
-    });
-
-    const options = {
-      hostname: 'generativelanguage.googleapis.com',
-      path: `/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postData),
-      },
     };
 
-    const apiReq = https.request(options, (apiRes) => {
-      let data = '';
-      apiRes.on('data', (chunk) => { data += chunk; });
-      apiRes.on('end', () => {
-        try {
-          const responseData = JSON.parse(data);
-          if (apiRes.statusCode >= 400 || !responseData.candidates || responseData.candidates.length === 0) {
-            console.error('Error from Gemini API:', data);
-            return res.status(500).json({ error: 'La IA no pudo generar una respuesta.' });
-          }
-          const title = responseData.candidates[0].content.parts[0].text;
-          res.status(200).json({ title: title.trim() });
-        } catch (e) {
-          console.error('Error parsing Gemini response:', data);
-          res.status(500).json({ error: 'Error al procesar la respuesta de la IA.' });
-        }
-      });
+    const apiResponse = await fetch(GEMINI_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
     });
 
-    apiReq.on('error', (e) => {
-      console.error('Error with API request:', e);
-      res.status(500).json({ error: 'Fallo en la comunicación con la IA.' });
-    });
+    const responseData = await apiResponse.json();
 
-    apiReq.write(postData);
-    apiReq.end();
+    if (!apiResponse.ok || !responseData.candidates || responseData.candidates.length === 0) {
+      console.error('Respuesta inválida de la API de Gemini:', JSON.stringify(responseData));
+      return res.status(500).json({ error: 'La IA no pudo generar una respuesta.' });
+    }
+    
+    const title = responseData.candidates[0].content.parts[0].text;
+    res.status(200).json({ title: title.trim() });
 
   } catch (error) {
     console.error('Error inesperado en la función del servidor:', error);
