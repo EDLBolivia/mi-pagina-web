@@ -1,10 +1,10 @@
+
 async function generateTitle(documentType, area, topic, focus, objective, company) {
     setLoading(true);
     const resultContainer = document.getElementById("result-content");
     if (resultContainer) resultContainer.textContent = '';
     
     try {
-        // Esta es la ruta correcta que funcionará ahora
         const response = await fetch('/api/index', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -17,7 +17,8 @@ async function generateTitle(documentType, area, topic, focus, objective, compan
                 const errorData = await response.json();
                 throw new Error(errorData.error || `Error del servidor: ${response.status}`);
             } else {
-                throw new Error(`El servidor falló (código: ${response.status}). Revisa la consola de Vercel para más detalles.`);
+                console.error("El servidor devolvió una respuesta de error no JSON. Estado:", `${response.status} ${response.statusText}`);
+                throw new Error(`El servidor falló (código: ${response.status}). Esto puede deberse a que la función no se encuentra o superó el límite de tiempo.`);
             }
         }
 
@@ -56,6 +57,7 @@ function App() {
 
     root.innerHTML = `
         <header>
+            <img src="logo.png" alt="Logotipo de la Escuela de Líderes" class="header-logo">
             <h1>ESCUELA DE LÍDERES<span>Bolivia</span></h1>
         </header>
         <main>
@@ -73,7 +75,7 @@ function App() {
             </section>
             
             <section class="card" aria-labelledby="generator-heading">
-                <h3 id="generator-heading">Logra el Título de tu Investigación, llenando este formulario:</h3>
+                <h3 id="generator-heading">Define Tu Investigación en 5 Pasos Clave:</h3>
                 <p class="form-intro">
                     Con los datos que nos proporciones en los siguientes pasos, te ayudaremos a estructurar un título de investigación sólido y pertinente.
                     <br><br>
@@ -138,6 +140,7 @@ function App() {
         </footer>
     `;
 
+    // Add event listeners
     const titleForm = document.getElementById("title-form");
     const docTypeSelect = document.getElementById("document-type");
     const companyGroup = document.getElementById("company-group");
@@ -153,12 +156,19 @@ function App() {
     
     titleForm?.addEventListener("submit", (e) => {
         e.preventDefault();
-        const documentType = document.getElementById("document-type").value;
-        const area = document.getElementById("area").value;
-        const topic = document.getElementById("topic").value;
-        const focus = document.getElementById("focus").value;
-        const objective = document.getElementById("objective").value;
-        const company = document.getElementById("company").value;
+        const docTypeSelectElement = document.getElementById("document-type");
+        const areaElement = document.getElementById("area");
+        const topicElement = document.getElementById("topic");
+        const focusElement = document.getElementById("focus");
+        const objectiveElement = document.getElementById("objective");
+        const companyElement = document.getElementById("company");
+
+        const documentType = docTypeSelectElement ? docTypeSelectElement.value : "";
+        const area = areaElement ? areaElement.value : "";
+        const topic = topicElement ? topicElement.value : "";
+        const focus = focusElement ? focusElement.value : "";
+        const objective = objectiveElement ? objectiveElement.value : "";
+        const company = companyElement ? companyElement.value : "";
 
         if (!documentType || !area.trim() || !topic.trim() || !focus.trim() || !objective.trim()) {
             alert("Por favor, completa todos los campos requeridos (Pasos 1 a 5) para generar el título.");
