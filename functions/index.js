@@ -1,23 +1,26 @@
-// Usa la herramienta 'node-fetch' que le acabamos de añadir.
-const fetch = require('node-fetch');
+const { GoogleGenAI } = require("@google/genai");
 
-// Esta es la función del servidor.
 module.exports = async (req, res) => {
-  // Configuración para permitir que tu página web hable con este motor.
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-control-allow-headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+  
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
     const API_KEY = process.env.API_KEY;
     if (!API_KEY) {
-      console.error("ERROR: API_KEY no está configurada en Vercel.");
+      console.error("CRITICAL ERROR: API_KEY no está configurada.");
       return res.status(500).json({ error: 'Error de configuración del servidor.' });
     }
+
+    const ai = new GoogleGenAI({apiKey: API_KEY});
 
     const { documentType, area, topic, focus, objective, company } = req.body;
 
@@ -36,30 +39,20 @@ module.exports = async (req, res) => {
       - Specific Company: ${company || 'N/A'}
       **Generate the Final Title Now.**
     `;
-
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
     
-    const requestBody = {
-      contents: [{
-        parts: [{ text: prompt }]
-      }]
-    };
-
-    const apiResponse = await fetch(GEMINI_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt
     });
 
-    const responseData = await apiResponse.json();
-
-    if (!apiResponse.ok || !responseData.candidates || responseData.candidates.length === 0) {
-      console.error('Respuesta inválida de la API de Gemini:', JSON.stringify(responseData));
-      return res.status(500).json({ error: 'La IA no pudo generar una respuesta.' });
-    }
+    const title = response.text;
     
-    const title = responseData.candidates[0].content.parts[0].text;
-    res.status(200).json({ title: title.trim() });
+    if (title) {
+        res.status(200).json({ title: title.trim() });
+    } else {
+        console.error('La API de Gemini devolvió una respuesta vacía o bloqueada.');
+        return res.status(500).json({ error: 'La IA no pudo generar una respuesta. El prompt puede haber sido bloqueado.' });
+    }
 
   } catch (error) {
     console.error('Error inesperado en la función del servidor:', error);
