@@ -1,4 +1,5 @@
-const { GoogleGenAI } = require("@google/genai");
+// Este es el único archivo que necesita usar 'require' porque está en el servidor.
+const fetch = require('node-fetch');
 
 // Esta función es el "motor" que se ejecuta en el servidor.
 module.exports = async (req, res) => {
@@ -23,8 +24,6 @@ module.exports = async (req, res) => {
   if (!API_KEY) {
     return res.status(500).json({ error: 'La clave de API no está configurada en el servidor.' });
   }
-
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
 
   const { documentType, area, topic, focus, objective, company } = req.body;
 
@@ -72,19 +71,42 @@ module.exports = async (req, res) => {
   `;
 
   try {
-    const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-          systemInstruction: "You are an expert thesis advisor applying principles of research methodology to create professional, specialized, and context-aware academic titles for Bolivian university students."
-        }
-    });
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
     
-    const title = response.text;
-    res.status(200).json({ title: title });
+    const requestBody = {
+      contents: [{
+        parts: [{
+          text: prompt
+        }]
+      }],
+      systemInstruction: {
+        parts: [{
+            text: "You are an expert thesis advisor applying principles of research methodology to create professional, specialized, and context-aware academic titles for Bolivian university students."
+        }]
+      }
+    };
+
+    const apiResponse = await fetch(GEMINI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!apiResponse.ok) {
+      const errorBody = await apiResponse.json();
+      console.error('Error from Gemini API:', errorBody);
+      throw new Error('La respuesta de la API de Gemini no fue exitosa.');
+    }
+
+    const responseData = await apiResponse.json();
+    const title = responseData.candidates[0].content.parts[0].text;
+    
+    res.status(200).json({ title: title.trim() });
 
   } catch (error) {
-    console.error("Error generating title in backend:", error);
-    res.status(500).json({ error: "Failed to generate title from the AI model." });
+    console.error("Error al generar el título en el backend:", error);
+    res.status(500).json({ error: "No se pudo generar el título desde el modelo de IA." });
   }
 };
