@@ -1,4 +1,3 @@
-
 async function generateTitle(documentType, area, topic, focus, objective, company) {
     setLoading(true);
     const resultContainer = document.getElementById("result-content");
