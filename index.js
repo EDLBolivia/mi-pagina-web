@@ -11,10 +11,8 @@ async function generateTitle(documentType, area, topic, focus, objective, compan
             body: JSON.stringify({ documentType, area, topic, focus, objective, company }),
         });
 
-        // INTENTA LEER LA RESPUESTA COMO JSON
         const data = await response.json();
 
-        // SI LA RESPUESTA ES UN ERROR (como 400 o 500), USA EL MENSAJE DE ERROR DEL JSON
         if (!response.ok) {
             throw new Error(data.error || 'Ocurrió un error desconocido en el servidor.');
         }
@@ -25,7 +23,6 @@ async function generateTitle(documentType, area, topic, focus, objective, compan
         }
 
     } catch (error) {
-        // SI LA RESPUESTA NO ES JSON O HAY OTRO PROBLEMA, MUESTRA UN MENSAJE GENÉRICO
         console.error("Error al generar el título:", error);
         if (resultContainer) {
             resultContainer.textContent = "Se produjo un error al generar el título. Por favor, inténtalo de nuevo.";
@@ -125,4 +122,55 @@ function App() {
                 ¡Contáctanos para tu Tesis!
             </a>
             
-            <a href="https://www.facebook.com/profile.php?id=10007
+            <a href="https://www.facebook.com/profile.php?id=100075766551353" id="facebook-fab" target="_blank" rel="noopener noreferrer" title="Obtén el Problema y Objetivos de tu Tesis: ¡Síguenos!">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor">
+                    <path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V325.7H135.4V256H194.2V205.6C194.2 147.6 228.8 116.5 282.7 116.5c26.4 0 52.5 2 52.5 2v53.1h-31.4c-27.8 0-33.2 13.2-33.2 32.6V256h58.8l-7.7 69.7h-51.1V504.5C429.3 476.8 512 376 512 256z"/>
+                </svg>
+                <span>Obtén el Problema y Objetivos de tu Tesis: ¡Síguenos!</span>
+            </a>
+        </main>
+        <footer>
+            <p>&copy; ${new Date().getFullYear()} Escuela de Líderes - Bolivia</p>
+        </footer>
+    `;
+
+    // Add event listeners
+    const titleForm = document.getElementById("title-form");
+    const docTypeSelect = document.getElementById("document-type");
+    const companyGroup = document.getElementById("company-group");
+
+    docTypeSelect?.addEventListener("change", (event) => {
+        const selectElement = event.target;
+        if (selectElement.value === "Proyecto de Grado") {
+            companyGroup?.classList.remove("hidden");
+        } else {
+            companyGroup?.classList.add("hidden");
+        }
+    });
+    
+    titleForm?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const docTypeSelectElement = document.getElementById("document-type");
+        const areaElement = document.getElementById("area");
+        const topicElement = document.getElementById("topic");
+        const focusElement = document.getElementById("focus");
+        const objectiveElement = document.getElementById("objective");
+        const companyElement = document.getElementById("company");
+
+        const documentType = docTypeSelectElement ? docTypeSelectElement.value : "";
+        const area = areaElement ? areaElement.value : "";
+        const topic = topicElement ? topicElement.value : "";
+        const focus = focusElement ? focusElement.value : "";
+        const objective = objectiveElement ? objectiveElement.value : "";
+        const company = companyElement ? companyElement.value : "";
+
+        if (!documentType || !area.trim() || !topic.trim() || !focus.trim() || !objective.trim()) {
+            alert("Por favor, completa todos los campos requeridos (Pasos 1 a 5) para generar el título.");
+            return;
+        }
+
+        generateTitle(documentType, area, topic, focus, objective, company);
+    });
+}
+
+App();
