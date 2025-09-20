@@ -1,5 +1,4 @@
 // ESTA ES LA VERSIÓN FINAL Y CORRECTA DEL SERVIDOR.
-// NO USA NINGUNA HERRAMIENTA EXTERNA, SOLO LAS QUE YA TIENE VERCEL.
 module.exports = async (req, res) => {
   // Configuración para permitir que tu página web hable con este motor.
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -9,11 +8,15 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
+  
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
 
   try {
     const API_KEY = process.env.API_KEY;
     if (!API_KEY) {
-      console.error("ERROR: API_KEY no está configurada en Vercel.");
+      console.error("CRITICAL ERROR: API_KEY no está configurada en Vercel.");
       return res.status(500).json({ error: 'Error de configuración del servidor.' });
     }
 
@@ -49,17 +52,7 @@ module.exports = async (req, res) => {
       body: JSON.stringify(requestBody),
     });
 
-    // Leemos la respuesta como texto primero para ver si es un error HTML
-    const responseText = await apiResponse.text();
-    
-    let responseData;
-    try {
-      // Intentamos convertir el texto a JSON. Si falla, es porque no es un JSON válido (como una página de error).
-      responseData = JSON.parse(responseText);
-    } catch (e) {
-      console.error('La respuesta del servidor no es un JSON válido:', responseText);
-      return res.status(500).json({ error: 'Error inesperado del servidor de la IA.' });
-    }
+    const responseData = await apiResponse.json();
 
     if (!apiResponse.ok || !responseData.candidates || responseData.candidates.length === 0) {
       console.error('Respuesta inválida de la API de Gemini:', JSON.stringify(responseData));
