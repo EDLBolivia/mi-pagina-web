@@ -73,7 +73,7 @@ function App() {
             </section>
             
             <section class="card" aria-labelledby="generator-heading">
-                <h3 id="generator-heading">Define Tu Investigación en 5 Pasos Clave:</h3>
+                <h3 id="generator-heading">Logra el Título de tu Investigación, llenando este formulario:</h3>
                 <p class="form-intro">
                     Con los datos que nos proporciones en los siguientes pasos, te ayudaremos a estructurar un título de investigación sólido y pertinente.
                     <br><br>
