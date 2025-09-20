@@ -1,9 +1,11 @@
+// ESTA ES LA VERSIÓN CORRECTA PARA LA PÁGINA PUBLICADA
 async function generateTitle(documentType, area, topic, focus, objective, company) {
     setLoading(true);
     const resultContainer = document.getElementById("result-content");
     if (resultContainer) resultContainer.textContent = '';
     
     try {
+        // Llama al "motor" seguro en el servidor
         const response = await fetch('/api/generateTitle', {
             method: 'POST',
             headers: {
@@ -12,22 +14,21 @@ async function generateTitle(documentType, area, topic, focus, objective, compan
             body: JSON.stringify({ documentType, area, topic, focus, objective, company }),
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'An unknown error occurred.');
+            throw new Error(data.error || 'Ocurrió un error desconocido.');
         }
         
-        const data = await response.json();
         const title = data.title;
-
         if (resultContainer) {
             resultContainer.textContent = title;
         }
 
     } catch (error) {
-        console.error("Error generating title:", error);
+        console.error("Error al generar el título:", error);
         if (resultContainer) {
-            resultContainer.textContent = "Se produjo un error al generar el título. Por favor, inténtalo de nuevo.";
+            resultContainer.textContent = `Se produjo un error al generar el título. Por favor, inténtalo de nuevo. (${error.message})`;
         }
     } finally {
         setLoading(false);
@@ -47,7 +48,6 @@ function setLoading(loading) {
         generateButton.textContent = loading ? "Generando..." : "Generar Título";
     }
 }
-
 
 function App() {
     const root = document.getElementById('root');
