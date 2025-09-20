@@ -1,11 +1,10 @@
-// ESTA ES LA VERSIÓN FINAL Y CORRECTA DE LA PÁGINA PRINCIPAL
 async function generateTitle(documentType, area, topic, focus, objective, company) {
     setLoading(true);
     const resultContainer = document.getElementById("result-content");
     if (resultContainer) resultContainer.textContent = '';
     
     try {
-        const response = await fetch('/api/generateTitle', {
+        const response = await fetch('/api/index', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ documentType, area, topic, focus, objective, company }),
