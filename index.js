@@ -1,3 +1,4 @@
+
 async function generateTitle(documentType, area, topic, focus, objective, company) {
     setLoading(true);
     const resultContainer = document.getElementById("result-content");
@@ -24,7 +25,7 @@ async function generateTitle(documentType, area, topic, focus, objective, compan
     } catch (error) {
         console.error("Error al generar el título:", error);
         if (resultContainer) {
-            resultContainer.textContent = "Se produjo un error al generar el título. Por favor, inténtalo de nuevo.";
+            resultContainer.textContent = error.message || "Se produjo un error al generar el título. Por favor, inténtalo de nuevo.";
         }
     } finally {
         setLoading(false);
