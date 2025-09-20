@@ -1,4 +1,4 @@
-// ESTA ES LA VERSIÓN FINAL Y CORRECTA DEL SERVIDOR
+// ESTA ES LA VERSIÓN FINAL Y CORRECTA DEL SERVIDOR.
 // NO USA NINGUNA HERRAMIENTA EXTERNA, SOLO LAS QUE YA TIENE VERCEL.
 module.exports = async (req, res) => {
   // Configuración para permitir que tu página web hable con este motor.
@@ -49,7 +49,17 @@ module.exports = async (req, res) => {
       body: JSON.stringify(requestBody),
     });
 
-    const responseData = await apiResponse.json();
+    // Leemos la respuesta como texto primero para ver si es un error HTML
+    const responseText = await apiResponse.text();
+    
+    let responseData;
+    try {
+      // Intentamos convertir el texto a JSON. Si falla, es porque no es un JSON válido (como una página de error).
+      responseData = JSON.parse(responseText);
+    } catch (e) {
+      console.error('La respuesta del servidor no es un JSON válido:', responseText);
+      return res.status(500).json({ error: 'Error inesperado del servidor de la IA.' });
+    }
 
     if (!apiResponse.ok || !responseData.candidates || responseData.candidates.length === 0) {
       console.error('Respuesta inválida de la API de Gemini:', JSON.stringify(responseData));
@@ -63,4 +73,4 @@ module.exports = async (req, res) => {
     console.error('Error inesperado en la función del servidor:', error);
     res.status(500).json({ error: 'Ocurrió un error inesperado en el servidor.' });
   }
-};    
+};
