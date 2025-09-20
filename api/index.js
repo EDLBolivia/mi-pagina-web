@@ -1,3 +1,4 @@
+
 const { GoogleGenAI } = require("@google/genai");
 
 module.exports = async (req, res) => {
@@ -24,19 +25,38 @@ module.exports = async (req, res) => {
     const { documentType, area, topic, focus, objective, company } = req.body;
 
     const prompt = `
-      **Your Role & Goal:** You are an expert thesis advisor for 'Escuela de Líderes - Bolivia'. Your goal is to generate a professional, impactful, and methodologically sound academic title. Analyze the user's input deeply.
-      **Title Quality Rules:** Eliminate spatial delimitation by default. Use professional & concise language. Balance simplicity & complexity.
-      **Methodological Structure:** The final title must clearly articulate: The What (problem), The Who/Where (object of study), The For What (goal).
-      **Example:** User Input: Problem: "Uso de la IA en marketing", Focus: "Tiendas virtuales", Objective: "Diseñar un modelo". Improved Title: "Diseño de un modelo de gestión comercial potenciado con Inteligencia Artificial para el desarrollo de tiendas virtuales."
-      **Strict Output Rules:** Assume Bolivian context but DO NOT mention "Bolivia" in the title unless essential. Max 20 words (excluding connectors). If 'Proyecto de Grado' and company is provided, incorporate it. Respond ONLY with the generated title text. No explanations.
-      **User's Input:**
-      - Document Type: ${documentType}
-      - Area of Study: ${area}
-      - Topic/Problem: ${topic}
-      - Research Focus: ${focus}
-      - Main Objective: ${objective}
-      - Specific Company: ${company || 'N/A'}
-      **Generate the Final Title Now.**
+      **ROLE & CONTEXT:** You are a senior academic advisor and research methodologist with global expertise. Your task is to transform a student's basic ideas into a formal, professional, and compelling academic research title. The user can be from anywhere in the world.
+
+      **CORE TASK:** Analyze the user's input not as literal words to be combined, but as concepts to be elevated. Your output must be a single, well-formed research title that is specific, measurable, and methodologically sound.
+
+      **ANALYSIS & REFINEMENT RULES:**
+      1.  **Deconstruct the Input:** Identify the core variables (independent/dependent), the population or context, and the intended academic action (e.g., analyze, design, evaluate, compare).
+      2.  **Elevate Language:** Replace simplistic terms with precise academic vocabulary. (e.g., "help" becomes "facilitate," "problems with kids" becomes "challenges in early childhood development").
+      3.  **Imply Methodology:** The title's structure should hint at the research approach. "Analysis of the Impact of X on Y" suggests a quantitative or qualitative study. "Design of a Framework for..." suggests a constructive/design science approach. "A Comparative Study of..." implies a comparative methodology.
+      4.  **Syntactic Precision:** Ensure perfect grammar, punctuation, and formal structure. Use connectors like "for the," "in the context of," "and its impact on," to create a coherent and professional title.
+      5.  **Global Perspective:** Do NOT assume any specific country. The title must be universally understandable. If a company is mentioned for a "Proyecto de Grado", integrate it formally (e.g., "...in the Company X, S.A.").
+
+      **STRICT OUTPUT FORMAT:**
+      - Respond ONLY with the generated title.
+      - NO explanations, NO greetings, NO preambles, NO quotation marks. Just the plain text of the title.
+
+      **EXAMPLE OF QUALITY TRANSFORMATION:**
+      -   **User Input:**
+          -   Area: "Marketing"
+          -   Topic: "Using AI for stores"
+          -   Focus: "Online shops"
+          -   Objective: "Make a model"
+      -   **Your Output (Exemplary Title):** Design and Implementation of an AI-Powered Predictive Analytics Model for Customer Behavior in E-commerce Platforms.
+
+      **USER'S RAW INPUT TO BE TRANSFORMED:**
+      -   Document Type: ${documentType}
+      -   Area of Study: ${area}
+      -   Topic/Problem: ${topic}
+      -   Research Focus: ${focus}
+      -   Main Objective: ${objective}
+      -   Specific Company (if applicable): ${company || 'N/A'}
+
+      **GENERATE THE ACADEMIC TITLE NOW:**
     `;
     
     const response = await ai.models.generateContent({
